@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#0d0f1a"/>
+  <title>Earth Journey — Made by Irfan</title>
+  <link rel="manifest" href="manifest.webmanifest"/>
+  <meta name="description" content="Know how many times Earth rotated and revolved since your birth, with a live orbit view. Made by Irfan."/>
+
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root{
+      --bg:#0d0f1a; --bg2:#0f1325; --fg:#e8f1ff; --muted:#a2b3cf;
+      --accent:#23b2ff; --accent2:#a3ffcd; --card:rgba(255,255,255,.06);
+      --glass:rgba(255,255,255,.08); --radius:20px; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--fg); background: radial-gradient(1200px 800px at 70% -10%, #193350 0%, var(--bg) 55%) fixed;
+      font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.35; min-height:100vh; display:flex; flex-direction:column;
+    }
+    .wrap{width:min(1100px,92vw); margin-inline:auto}
+
+    header{position:sticky; top:0; z-index:50; backdrop-filter:blur(8px);
+      background:linear-gradient(180deg, rgba(13,15,26,.9), rgba(13,15,26,.55) 60%, transparent);
+      border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between; padding:12px 0}
+    .brand{display:flex; align-items:center; gap:12px}
+    .logo{
+      width:34px; height:34px; border-radius:999px; position:relative; overflow:hidden;
+      background: radial-gradient(circle at 30% 30%, #3ad6ff, #0a6db1);
+      box-shadow: inset 0 0 18px rgba(255,255,255,.25), 0 4px 14px rgba(0,0,0,.4);
+    }
+    .badge{background:linear-gradient(130deg,#1b2038,#121528); border:1px solid rgba(255,255,255,.08);
+      color:#a3ffcd; padding:8px 12px; border-radius:999px; font-weight:700; box-shadow:var(--shadow); font-size:.9rem
+    }
+
+    main{flex:1}
+    .hero{display:grid; gap:18px; padding:28px 0 18px}
+    .title{font-size:clamp(1.4rem,3.5vw,2.4rem); font-weight:800}
+    .subtitle{color:var(--muted)}
+    .card{background:linear-gradient(180deg, var(--glass), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08); border-radius:var(--radius); box-shadow:var(--shadow)}
+
+    .controls{display:grid; grid-template-columns:1fr auto; gap:10px; padding:14px}
+    .controls input[type="date"]{background:rgba(255,255,255,.07); color:var(--fg); border:1px solid rgba(255,255,255,.12);
+      padding:14px 16px; border-radius:14px; font-size:1rem; outline:none}
+    .btn{appearance:none; border:none; cursor:pointer; background:linear-gradient(135deg, var(--accent), #4de4ff);
+      color:#002438; padding:14px 18px; border-radius:14px; font-weight:800; letter-spacing:.3px;
+      box-shadow:0 10px 22px rgba(35,178,255,.3), inset 0 -3px 0 rgba(0,0,0,.18); transition:transform .04s ease}
+    .btn:active{transform:translateY(1px)}
+
+    .grid{display:grid; gap:14px; padding:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+    .stat{padding:16px; position:relative; overflow:hidden}
+    .stat h3{margin:6px 0 4px; font-size:.95rem; color:var(--muted); font-weight:600}
+    .num{font-size:clamp(1.2rem,2.6vw,1.8rem); font-weight:800}
+    .chip{position:absolute; top:10px; right:10px; font-size:.72rem; padding:6px 10px; border-radius:999px;
+      color:#b6d8ff; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.06)}
+
+    .viz{display:grid; grid-template-columns:1fr; gap:14px; padding:14px}
+    .orb-card{padding:16px}
+    .legend{display:flex; gap:10px; align-items:center; color:var(--muted)}
+    .dot{width:10px; height:10px; border-radius:50%}
+    .dot-today{background:var(--accent); box-shadow:0 0 10px var(--accent)}
+    .dot-birth{background:var(--accent2); box-shadow:0 0 10px var(--accent2)}
+    svg{width:100%; max-width:540px; aspect-ratio:1/1; display:block; margin:0 auto}
+    .sun{filter:drop-shadow(0 0 20px rgba(255,209,102,.5))}
+
+    footer{margin:12px 0 40px; text-align:center; color:var(--muted)}
+    .install-wrap{padding:14px; display:flex; justify-content:center}
+    .install-btn{background:linear-gradient(130deg,#1b2038,#121528); color:#bfe9ff; border:1px solid rgba(255,255,255,.1);
+      padding:12px 16px; border-radius:14px; font-weight:700}
+
+    .watermark{position:fixed; bottom:14px; right:14px; padding:8px 12px; background:rgba(163,255,205,.12);
+      border:1px solid rgba(163,255,205,.4); color:#bfffe1; border-radius:999px; font-weight:700; font-size:.85rem; z-index:20; backdrop-filter:blur(6px)}
+    @media (min-width:960px){.hero{grid-template-columns:2.1fr 1.2fr; align-items:end} .viz{grid-template-columns:1.4fr 1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div style="font-weight:800">Earth Journey</div>
+          <div style="font-size:.8rem; color:#8fbaff">Made by Irfan</div>
+        </div>
+      </div>
+      <div class="badge">Private • Offline-ready</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <div class="title">How many times has Earth <em>rotated</em> and <em>revolved</em> since you were born?</div>
+        <p class="subtitle">Enter your date of birth to see Earth rotations (days), sidereal rotations (relative to the stars), total revolutions around the Sun, and a live orbit view.</p>
+      </div>
+
+      <div class="card">
+        <form class="controls" id="dobForm">
+          <label for="dob" style="position:absolute;left:-9999px">Date of Birth</label>
+          <input id="dob" name="dob" type="date" required>
+          <button class="btn" type="submit">Show my Earth journey</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="grid" id="stats">
+      <div class="card stat">
+        <div class="chip">Solar day</div>
+        <h3>Earth rotations (days lived)</h3>
+        <div class="num" id="daysLived">—</div>
+      </div>
+      <div class="card stat">
+        <div class="chip">Sidereal day</div>
+        <h3>Sidereal rotations (relative to stars)</h3>
+        <div class="num" id="siderealRot">—</div>
+      </div>
+      <div class="card stat">
+        <div class="chip">Tropical year</div>
+        <h3>Earth revolutions</h3>
+        <div class="num" id="revolutions">—</div>
+      </div>
+      <div class="card stat">
+        <div class="chip">Calendar</div>
+        <h3>Age breakdown</h3>
+        <div class="num" id="ageBreakdown">—</div>
+      </div>
+    </section>
+
+    <section class="viz">
+      <div class="card orb-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+          <div style="font-weight:700">Your orbit positions</div>
+          <div class="legend">
+            <span class="dot dot-today"></span> Today &nbsp;&nbsp;
+            <span class="dot dot-birth"></span> Birth
+          </div>
+        </div>
+
+        <!-- Orbit SVG -->
+        <svg viewBox="0 0 600 600" aria-label="Earth orbit visualization" role="img">
+          <defs>
+            <radialGradient id="sunG" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fff2b3"/><stop offset="60%" stop-color="#ffd166"/><stop offset="100%" stop-color="#f6a31d"/>
+            </radialGradient>
+          </defs>
+          <circle class="sun" cx="300" cy="300" r="34" fill="url(#sunG)"/>
+          <circle cx="300" cy="300" r="220" fill="none" stroke="rgba(163,255,205,.45)" stroke-width="3" stroke-dasharray="8 8"/>
+          <path id="arc" d="" stroke="rgba(35,178,255,.55)" stroke-width="4" fill="none"/>
+          <circle id="birthDot" r="9" fill="#a3ffcd"/>
+          <circle id="todayDot" r="10" fill="#23b2ff"/>
+          <text id="birthLabel" x="0" y="0" font-size="14" fill="#c9ffdf" text-anchor="middle"></text>
+          <text id="todayLabel" x="0" y="0" font-size="14" fill="#b9dfff" text-anchor="middle"></text>
+        </svg>
+      </div>
+
+      <div class="card orb-card" style="padding:18px">
+        <h3 style="margin:0 0 10px">Notes</h3>
+        <ul style="margin:0; padding-left:18px; color:var(--muted)">
+          <li><strong>Rotations (solar)</strong> ≈ days lived.</li>
+          <li><strong>Sidereal rotations</strong> use 23h 56m 4s per rotation.</li>
+          <li><strong>Revolutions</strong> use a tropical year ≈ 365.242189 days.</li>
+          <li>Orbit drawing is circular for clarity (good approximation).</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="install-wrap">
+      <button id="installBtn" class="install-btn" hidden>Install App</button>
+    </div>
+  </main>
+
+  <footer class="wrap">
+    <div class="subtitle">Built with curiosity • <strong>Made by Irfan</strong></div>
+  </footer>
+
+  <div class="watermark">Made by Irfan</div>
+
+  <script>
+    // ---------- PWA registration ----------
+    if ('serviceWorker' in navigator) {
+      addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    }
+    let deferredPrompt; const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.hidden = false; });
+    installBtn?.addEventListener('click', async () => { deferredPrompt?.prompt(); await deferredPrompt?.userChoice; installBtn.hidden = true; deferredPrompt = null; });
+
+    // ---------- Math constants ----------
+    const MS_PER_DAY = 24*60*60*1000;
+    const SIDEREAL_DAY_S = 86164.0905;      // seconds
+    const TROPICAL_YEAR_D = 365.242189;     // days (mean tropical year)
+
+    // ---------- Helpers ----------
+    const $ = (id)=>document.getElementById(id);
+    const fmt = (n,d=0)=>Number(n).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+    const toUTC = (y,m,d)=>new Date(Date.UTC(y,m,d));
+    const todayLocal = new Date();
+    const todayUTC = toUTC(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate());
+
+    function daysBetweenUTC(aUTC, bUTC){ return Math.floor((bUTC - aUTC)/MS_PER_DAY); }
+    function dayOfYearUTC(dUTC){ const start = Date.UTC(dUTC.getUTCFullYear(),0,1); return Math.floor((dUTC - start)/MS_PER_DAY)+1; }
+    function daysInYearUTC(year){ const start = Date.UTC(year,0,1), end = Date.UTC(year+1,0,1); return Math.floor((end-start)/MS_PER_DAY); }
+    function ageYMD(dobUTC, nowUTC){
+      let y = nowUTC.getUTCFullYear() - dobUTC.getUTCFullYear();
+      let m = nowUTC.getUTCMonth() - dobUTC.getUTCMonth();
+      let d = nowUTC.getUTCDate() - dobUTC.getUTCDate();
+      if (d<0){ const prevMonthDays = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 0)).getUTCDate(); d += prevMonthDays; m--; }
+      if (m<0){ m += 12; y--; }
+      return {y,m,d};
+    }
+
+    // ---------- Orbit drawing ----------
+    const CX=300, CY=300, R=220;
+    const birthDot = $('birthDot'), todayDot = $('todayDot'), arc = $('arc'), birthLabel = $('birthLabel'), todayLabel = $('todayLabel');
+
+    function pol2cart(angleDeg){
+      const rad = (angleDeg - 90) * Math.PI/180; // 0° at top
+      return { x: CX + R * Math.cos(rad), y: CY + R * Math.sin(rad) };
+    }
+    function arcPath(startDeg, endDeg){
+      const s = pol2cart(startDeg), e = pol2cart(endDeg);
+      const sweep = 1;
+      const largeArc = ((endDeg - startDeg + 360) % 360) > 180 ? 1 : 0;
+      return `M ${s.x} ${s.y} A ${R} ${R} 0 ${largeArc} ${sweep} ${e.x} ${e.y}`;
+    }
+
+    // ---------- UI ----------
+    const form = $('dobForm'), input = $('dob');
+    const daysEl = $('daysLived'), siderealEl = $('siderealRot'), revEl = $('revolutions'), ageEl = $('ageBreakdown');
+    input.max = new Date().toISOString().split('T')[0];
+
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      if (!input.value) return;
+      const [yy,mm,dd] = input.value.split('-').map(Number);
+      const dobUTC = toUTC(yy,mm-1,dd);
+      if (dobUTC > todayUTC){ alert('Birth date cannot be in the future.'); return; }
+
+      // Core numbers
+      const daysLived = daysBetweenUTC(dobUTC, todayUTC);
+      const siderealRot = ((todayUTC - dobUTC)/1000) / SIDEREAL_DAY_S;
+      const revolutions = ( (todayUTC - dobUTC)/MS_PER_DAY ) / TROPICAL_YEAR_D;
+
+      const {y,m,d} = ageYMD(dobUTC, todayUTC);
+
+      daysEl.textContent = fmt(daysLived);
+      siderealEl.textContent = fmt(siderealRot, 2);
+      revEl.textContent = fmt(revolutions, 6);
+      ageEl.textContent = `${y} years • ${m} months • ${d} days`;
+
+      // Orbit angles (approximate, circular orbit):
+      // - Birth: position within tropical year based on day-of-year of DOB (in its year)
+      // - Today: position within this calendar year
+      const todayYear = todayUTC.getUTCFullYear();
+      const birthOrdinal = dayOfYearUTC(toUTC(yy, mm-1, dd));
+      const todayOrdinal = dayOfYearUTC(todayUTC);
+      const yearDays = daysInYearUTC(todayYear);
+
+      const angleBirth = ((birthOrdinal-1) / TROPICAL_YEAR_D) * 360 % 360;
+      const angleToday = ((todayOrdinal-1) / yearDays) * 360 % 360;
+
+      const B = pol2cart(angleBirth), T = pol2cart(angleToday);
+      birthDot.setAttribute('cx', B.x); birthDot.setAttribute('cy', B.y);
+      todayDot.setAttribute('cx', T.x); todayDot.setAttribute('cy', T.y);
+
+      birthLabel.setAttribute('x', B.x); birthLabel.setAttribute('y', B.y - 14); birthLabel.textContent = 'Birth';
+      todayLabel.setAttribute('x', T.x); todayLabel.setAttribute('y', T.y - 14); todayLabel.textContent = 'Today';
+
+      let start = angleBirth, end = angleToday; if (end <= start) end += 360;
+      arc.setAttribute('d', arcPath(start, end));
+
+      // Gentle pulse to highlight "Today"
+      todayDot.animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}], {duration:1800,iterations:Infinity});
+    });
+
+    // Demo default (optional): uncomment to auto-fill
+    // input.value = '2005-08-15'; form.dispatchEvent(new Event('submit'));
+  </script>
+</body>
+</html>
